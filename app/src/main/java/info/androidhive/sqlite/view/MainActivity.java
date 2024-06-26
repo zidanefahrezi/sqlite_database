@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,13 +162,16 @@ public class MainActivity extends AppCompatActivity implements NotesAdapter.OnNo
         LayoutInflater layoutInflaterAndroid = LayoutInflater.from(getApplicationContext());
         View view = layoutInflaterAndroid.inflate(R.layout.note_dialog, null);
 
-        AlertDialog.Builder alertDialogBuilderUserInput = new AlertDialog.Builder(MainActivity.this);
-        alertDialogBuilderUserInput.setView(view);
+        final AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        alertDialog.setView(view);
 
         final EditText inputNama = view.findViewById(R.id.nama);
         final EditText inputRegistNo = view.findViewById(R.id.regist_no);
         final EditText inputPhone = view.findViewById(R.id.phone);
         final EditText inputEmail = view.findViewById(R.id.email);
+        final Button btnCreate = view.findViewById(R.id.btn_create);
+        final Button btnUpdate = view.findViewById(R.id.btn_update);
+        final Button btnCancel = view.findViewById(R.id.btn_cancel);
         TextView dialogTitle = view.findViewById(R.id.dialog_title);
         dialogTitle.setText(!shouldUpdate ? getString(R.string.lbl_new_note_title) : getString(R.string.lbl_edit_note_title));
 
@@ -176,26 +180,14 @@ public class MainActivity extends AppCompatActivity implements NotesAdapter.OnNo
             inputRegistNo.setText(String.valueOf(note.getRegistNo()));
             inputPhone.setText(String.valueOf(note.getPhone()));
             inputEmail.setText(note.getEmail());
+            btnCreate.setVisibility(View.GONE);
+            btnUpdate.setVisibility(View.VISIBLE);
+        } else {
+            btnCreate.setVisibility(View.VISIBLE);
+            btnUpdate.setVisibility(View.GONE);
         }
 
-        alertDialogBuilderUserInput
-                .setCancelable(false)
-                .setPositiveButton(shouldUpdate ? "update" : "save", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialogBox, int id) {
-                        // Intentionally left empty
-                    }
-                })
-                .setNegativeButton("cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialogBox, int id) {
-                                dialogBox.cancel();
-                            }
-                        });
-
-        final AlertDialog alertDialog = alertDialogBuilderUserInput.create();
-        alertDialog.show();
-
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+        btnCreate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (TextUtils.isEmpty(inputNama.getText().toString()) ||
@@ -208,20 +200,43 @@ public class MainActivity extends AppCompatActivity implements NotesAdapter.OnNo
                     alertDialog.dismiss();
                 }
 
-                if (shouldUpdate && note != null) {
-                    updateNote(inputNama.getText().toString(),
-                            Integer.parseInt(inputRegistNo.getText().toString()),
-                            Integer.parseInt(inputPhone.getText().toString()),
-                            inputEmail.getText().toString(), position);
-                } else {
-                    createNote(inputNama.getText().toString(),
-                            Integer.parseInt(inputRegistNo.getText().toString()),
-                            Integer.parseInt(inputPhone.getText().toString()),
-                            inputEmail.getText().toString());
-                }
+                createNote(inputNama.getText().toString(),
+                        Integer.parseInt(inputRegistNo.getText().toString()),
+                        Integer.parseInt(inputPhone.getText().toString()),
+                        inputEmail.getText().toString());
             }
         });
+
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (TextUtils.isEmpty(inputNama.getText().toString()) ||
+                        TextUtils.isEmpty(inputRegistNo.getText().toString()) ||
+                        TextUtils.isEmpty(inputPhone.getText().toString()) ||
+                        TextUtils.isEmpty(inputEmail.getText().toString())) {
+                    Toast.makeText(MainActivity.this, "All fields are required!", Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    alertDialog.dismiss();
+                }
+
+                updateNote(inputNama.getText().toString(),
+                        Integer.parseInt(inputRegistNo.getText().toString()),
+                        Integer.parseInt(inputPhone.getText().toString()),
+                        inputEmail.getText().toString(), position);
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.cancel();
+            }
+        });
+
+        alertDialog.show();
     }
+
 
     private void toggleEmptyNotes() {
         if (db.getNotesCount() > 0) {

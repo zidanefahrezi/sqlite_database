@@ -18,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/margin_top_no_notes"
+        android:layout_marginTop="280dp"
         android:fontFamily="sans-serif-light"
         android:text="@string/msg_no_notes"
         android:textColor="@color/msg_no_notes"
